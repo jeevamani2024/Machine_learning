@@ -1,0 +1,250 @@
+---
+title: "Clustering Assignment 4"
+author: "Jeeva"
+date: "2023-11-07"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ 
+Summary:
+
+According to my observations, the offered statement represents a circumstance in which a financial analyst for stocks is evaluating data from 21 pharmaceutical businesses. The purpose is to employ numerical variable cluster analysis to understand the structure of the pharmaceutical sector. Market capitalization, beta, price/earnings ratio, return on equity, return on assets, asset turnover, leverage, anticipated revenue growth, and net profit margin are just a few of the financial measures covered in the data. So, in this R, I discussed many library tools and formulated to get plot diagrams. Because each explanation is mentioned on the codes.
+ 
+Problem:
+
+An equities analyst is studying the pharmaceutical industry and would like your help in exploring and understanding the financial data collected by her firm. Her main objective is to understand the structure of the pharmaceutical industry using some basic financial measures. Financial data gathered on 21 firms in the pharmaceutical industry are available in the file Pharmaceuticals.csv Download Pharmaceuticals.csv. For each firm, the following variables are recorded:  
+
+1.  Market capitalization (in billions of dollars)
+2.  Beta
+3.  Price/earnings ratio
+4.  Return on equity
+5.  Return on assets
+6.  Asset turnover
+7.  Leverage
+8.  Estimated revenue growth
+9.  Net profit margin
+10. Median recommendation (across major brokerages)
+11. Location of firm’s headquarters
+12. Stock exchange on which the firm is listed
+
+Use cluster analysis to explore and analyze the given dataset as follows: 
+
+1.  Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on. 
+
+2.  Interpret the clusters with respect to the numerical variables used in forming the clusters. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters)
+
+3.  Provide an appropriate name for each cluster using any or all of the variables in the dataset.
+
+Statement:
+
+The equities analyst tasked with analyzing the pharmaceutical industry is looking for help in exploring and comprehending the financial data gathered on 21 pharmaceutical corporations. The purpose is to get insights into the structure of the industry through the use of fundamental financial measurements. Pharmaceuticals.csv contains variables such as market capitalization, beta, price/earnings ratio, return on equity, return on assets, asset turnover, leverage, estimated revenue growth, net profit margin, median recommendation, headquarters location, and stock exchange on which the company is listed. The analyst aims to utilize cluster analysis to categorize the 21 pharmaceutical enterprises, focusing on number factors (1-9). This demands justifying cluster analysis decisions such as the weighting of various variables, the choice of clustering algorithm(s), the number of clusters, and other pertinent considerations. The analysis should not only generate clusters but also interpret them in terms of the numerical variables that were utilized to generate them. Furthermore, the equities analyst is curious whether there are any visible trends in the clusters about the factors that were not employed in the clustering method (variables 10 to 12). The equities analyst must provide appropriate labels to each cluster as part of the analysis, utilizing any or all of the variables in the dataset. This will aid in making informed investment decisions by providing a full overview of the pharmaceutical industry's financial landscape.
+
+
+
+ 
+```{r}
+
+# Calling Required Libraries
+
+library(class)
+library(caret)
+library(e1071)
+library(tidyverse)
+library(ISLR)
+library(factoextra)
+library(dbscan)
+library(fpc)
+```
+
+```{r}
+
+# Calling the csv file
+
+pharma.data <- read.csv("C:/Users/jeeva thangamani/Documents/GitHub/64060_-jthangam/Assignment_4/Pharmaceuticals.csv")
+dim(pharma.data)
+t(t(names(pharma.data)))
+
+# Interpretation :The dimensions of the data frame can be used to calculate the number of observations (rows) and variables (columns). You can flip the column names to display them in a different format or orientation.
+```
+
+```{r}
+
+# Dropping thge columns that are not required for clustering
+
+pharma.data <- pharma.data[ ,-c(1,2,12,13,14)]
+dim(pharma.data)
+summary(pharma.data)
+t(t(names(pharma.data)))
+
+# Interpretation :Columns with indices 1, 2, 12, 13, and 14 may have been eliminated because the data in those columns is redundant, does not require analysis, or does not appear to be relevant to the work at hand. When summary statistics are calculated, they provide a short summary of the distribution and central tendency of the remaining variables in the adjusted data frame. This can help in understanding the qualities of the data.
+
+```
+```{r}
+
+# Initiating with K means
+
+pharma.data1 <- scale(pharma.data)
+head(pharma.data1)
+distance <- get_dist(pharma.data1)
+fviz_dist(distance)
+
+# Interpretation : To standardize the columns in the pharmacy.an array of data frames, the scale function is utilized. The two stages involved in standardization are scaling by the standard deviation and centering the variables by subtracting the mean. The code is most likely part of an exploratory study or a warm-up for a clustering task where the separations between data points are critical. The research requirements or the algorithm used to determine which distance and standardization computations are required.
+
+```
+
+
+```{r}
+
+# Defining K=3 
+
+set.seed(159)
+k <- 3
+k3 <- kmeans(pharma.data1, centers = k, nstart=21)
+k3$centers
+k3$size
+k3$cluster
+fviz_cluster(k3, pharma.data1)
+
+# To apply k-means clustering to the standardized pharmaceutical data, the code employs three clusters. The next lines extract and display information on cluster centers, sizes, and assignments. Finally, a visualization is generated to enable for visual inspection of the data clusters discovered. Three clusters (k = 3) were chosen based on the assumption or prior knowledge that the data can be efficiently separated into three distinct clusters.
+
+
+```
+```{r}
+fviz_nbclust(pharma.data1, kmeans, method = "wss")
+
+# Plots are generally shaped like an elbow, and the "elbow" is a possible alternative for the appropriate number of clusters. This is the point at which the within-cluster sum of squares begins to decline more slowly, implying that as the number of clusters increases, performance worsens as the within-cluster variance decreases. This plot shows where increasing the number of clusters reduces within-cluster variability more effectively. When selecting the optimal number of clusters, "elbow" is usually viewed as an acceptable alternative.
+
+
+```
+
+
+```{r}
+
+# Using dbscan library
+
+library(dbscan)
+d <- read.csv("C:/Users/jeeva thangamani/Documents/GitHub/64060_-jthangam/Assignment_4/Pharmaceuticals.csv")
+```
+
+```{r}
+data1 <- d[ ,-c(1,2,12,13,14)]
+data1
+```
+
+
+
+
+```{r}
+set.seed(12)
+db <- dbscan::dbscan(data1, eps = 25, MinPts = 2) #perform clustering
+
+print(db)
+
+```
+```{r}
+library('factoextra')
+library('fpc')
+df <- data1[, 1:9]
+
+set.seed(123)
+db <- fpc::dbscan(data1, eps = 35, MinPts = 1) 
+
+print(db) 
+
+# The precise parameters (eps and MinPts) are established based on the properties of the data or the aims of the study in order to detect dense areas or groups within the data. The factoextra package can then be used to view the clustering results. Use the print(db) statement to see information about the clusters detected by the method, such as the number of clusters and the points assigned to each cluster. This phase aids comprehension of the cluster analysis results.
+
+
+
+```
+
+
+```{r}
+fviz_cluster(db, data1,   stand = FALSE, frame = FALSE, geom = "point")
+
+# When evaluating the output of a clustering technique such as DBSCAN, it can be useful to see clusters. Analyzing the spatial distribution of data points inside clusters and analyzing how efficiently the clustering algorithm groups comparable data points together are both beneficial.
+
+
+
+```
+
+
+#Hierarchical
+```{r}
+A <- read.csv("C:/Users/jeeva thangamani/Documents/GitHub/64060_-jthangam/Assignment_4/Pharmaceuticals.csv")
+Sorted.data <- A[ ,-c(1,2,12,13,14)]
+```
+
+
+Compute Euclidean distance
+```{r}
+d <- dist(Sorted.data, method = "euclidean")
+d.norm <- dist(Sorted.data[,c(4,8)], method = "euclidean")
+```
+
+## Table 15.4
+
+```{r}
+filt.data <- sapply(Sorted.data, scale)
+
+row.names(filt.data) <- row.names(Sorted.data) 
+
+
+d.norm <- dist(filt.data[,c(4,8)], method = "euclidean")
+
+```
+
+## Figure 15.3
+```{r}
+d.norm <- dist(filt.data, method = "euclidean")
+
+hc1 <- hclust(d.norm, method = "single")
+plot(hc1, hang = -1, ann = FALSE)
+hc2 <- hclust(d.norm, method = "average")
+plot(hc2, hang = -1, ann = FALSE)
+
+# Hierarchical clustering organizes data into a hierarchy of nested clusters; the linkage mechanism employed influences how the clusters form. Different connection strategies capture the data structure in different ways. The dendrogram that emerges when the hierarchical clustering structures are shown using the plot function shows how the observations are arranged into groups based on different levels of similarity. Because the linking method used can alter the shape and structure of the resulting dendrogram, it is common practice to study multiple linkage methods to acquire insights into the data's underlying clustering tendencies.
+
+
+
+```
+
+
+#### Table 15.6
+
+```{r}
+memb <- cutree(hc1, k = 3)
+memb
+memb <- cutree(hc2, k = 3)
+memb
+
+```
+
+
+
+## Figure 15.4
+
+```{r}
+row.names(filt.data) <- paste(memb, ": ", row.names(Sorted.data), sep = "")
+
+# plot heatmap 
+# rev() reverses the color mapping to large = dark
+
+heatmap(as.matrix(filt.data), Colv = NA, hclustfun = hclust, 
+        col=rev(paste("gray",1:99,sep="")))
+
+# The code attempts to graphically portray the data structure in order to show relationships and patterns within and across clusters. This is especially beneficial for learning more about the features of distinct clusters and conducting early data analysis.
+
+
+
+```
+
+
+
+
+
+
